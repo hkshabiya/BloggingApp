@@ -6,35 +6,45 @@ import { Blog } from '../components/Blog'
 import { Search } from '../components/Search'
 import { Category } from '../components/Category'
 import { LatestBlog } from '../components/LatestBlog'
+import { Pagination } from '../components/Pagination'
 
 export const Home = () => {
   const [data, setData] = useState([])
   const [latestBlog, setLatestBlog] = useState([])
   const [searchValue, setSearchValue] = useState("")
+  const [currentPage, setCurrentPage] = useState(0)
+  const [totalBlog, setTotalBlog] = useState(null)
+  const [pageLimit] = useState(0)
   const options = ["Travel", "Fashion", "Fitness", "Sports", "Food", "Tech"]
 
 
   useEffect(() => {
-    loadBlogsData()
+    loadBlogsData(0, 5, 0)
     fetchLatestBlog()
   }, [])
 
-  const loadBlogsData = async () => {
-    const response = await axios.get("http://localhost:5000/blogs")
+  const loadBlogsData = async (start, end, increase, operation) => {
+    const totalBlog = await axios.get(`http://localhost:5000/blogs`)
+    setTotalBlog(totalBlog.data.length)
+    const response = await axios.get(`http://localhost:5000/blogs?_start=${start}&_end=${end}`)
     if (response.status === 200) {
       setData(response.data)
+      if (operation) {
+        setCurrentPage(0)
+      } else {
+        setCurrentPage(currentPage + increase)
+      }
     } else {
       toast.error("Somthing wents Wrong")
     }
   }
-  console.log(data);
 
   const handelDelete = async (id) => {
     if (window.confirm("Are you sure that wanted to delete that blog?")) {
       const response = await axios.delete(`http://localhost:5000/blogs/${id}`)
       if (response.status === 200) {
         toast.success("Blog deleted Successfull")
-        loadBlogsData()
+        loadBlogsData(0, 5, 0, "delete")
       } else {
         toast.error("Somthing wents Wrong")
       }
@@ -49,7 +59,7 @@ export const Home = () => {
   }
   const onInputChange = (e) => {
     if (!e.target.value) {
-      loadBlogsData()
+      loadBlogsData(0,5,0)
     }
     setSearchValue(e.target.value)
   }
@@ -112,11 +122,20 @@ export const Home = () => {
         <MDBCol size="3">
           <h4 className='text-start'>Latest Post</h4>
           {latestBlog && latestBlog.map((item, index) => {
-          return  <LatestBlog key={index} {...item} />
+            return <LatestBlog key={index} {...item} />
           })}
           <Category options={options} handlecategory={handlecategory} />
         </MDBCol>
       </MDBRow>
+      <div className="mt-3">
+        <Pagination
+          currentPage={currentPage}
+          loadBlogData={loadBlogsData}
+          pageLimit={pageLimit}
+          data={data}
+          totalBlog={totalBlog}
+        />
+      </div>
     </>
   )
 }
