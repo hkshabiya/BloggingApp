@@ -4,10 +4,13 @@ import { toast } from 'react-toastify'
 import { MDBRow, MDBCol, MDBContainer, MDBTypography } from 'mdb-react-ui-kit'
 import { Blog } from '../components/Blog'
 import { Search } from '../components/Search'
+import { Category } from '../components/Category'
 
 export const Home = () => {
   const [data, setData] = useState([])
   const [searchValue, setSearchValue] = useState("")
+  const options = ["Travel", "Fashion", "Fitness", "Sports", "Food", "Tech"]
+
 
   useEffect(() => {
     loadBlogsData()
@@ -57,6 +60,14 @@ export const Home = () => {
     }
 
   }
+  const handlecategory= async(category)=>{
+    const response =await axios.get(`http://localhost:5000/blogs?category=${category}`)
+    if(response.status === 200){
+      setData(response.data)
+    }else{
+      toast.error("Sothing went wrong")
+    }
+  }
 
   return (
     <>
@@ -83,6 +94,9 @@ export const Home = () => {
               })}
             </MDBRow>
           </MDBContainer>
+        </MDBCol>
+        <MDBCol size="3">
+              <Category options={options}  handlecategory={handlecategory}/>
         </MDBCol>
       </MDBRow>
     </>
