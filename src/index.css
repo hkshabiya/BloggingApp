@@ -54,3 +54,8 @@ h1:after {
   max-width: 550px;
   align-content: center;
 }
+.latest-title{
+  color: black;
+  font-weight: 600;
+  font-family: monospace;
+}
